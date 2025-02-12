@@ -1,10 +1,15 @@
 {
-  "name": "re-guard",
+  "name": "@type-hub/re-guard",
   "version": "1.0.0",
   "description": "Type-safe regex suite: build predicates, guards, and assertions from a single regex func",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepare": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -24,6 +29,7 @@
   },
   "homepage": "https://github.com/type-hub/re-guard#readme",
   "devDependencies": {
+    "@types/node": "^22.13.1",
     "typescript": "^5.7.3"
   }
 }
