@@ -1,0 +1,29 @@
+{
+  "name": "re-guard",
+  "version": "1.0.0",
+  "description": "Type-safe regex suite: build predicates, guards, and assertions from a single regex func",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/type-hub/re-guard.git"
+  },
+  "keywords": [
+    "regex",
+    "type",
+    "guard",
+    "predicates",
+    "assertions"
+  ],
+  "author": "Wojciech Morawski",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/type-hub/re-guard/issues"
+  },
+  "homepage": "https://github.com/type-hub/re-guard#readme",
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
