@@ -1,17 +1,15 @@
-import { BrandedRegexFactory, ExcludeUndefined } from "../types";
+import { BrandedFunction, GetBrand } from "../types";
 
-type GetBrand<BRF extends BrandedRegexFactory> = ExcludeUndefined<BRF["brand"]>;
-
-export type BuildGuard<BRF extends BrandedRegexFactory> = (
-  v: string
+export type BuildGuard<BRF extends BrandedFunction> = (
+  v: any
 ) => v is GetBrand<BRF>;
 
-export const guardBuilder = <BRF extends BrandedRegexFactory>(
+export const guardBuilder = <BRF extends BrandedFunction>(
   brf: BRF
 ): BuildGuard<BRF> => {
-  const guard = (value: string): value is GetBrand<BRF> => {
-    const regex = brf();
-    return regex.test(value);
+  const guard = (value: any): value is GetBrand<BRF> => {
+    const validator = brf();
+    return validator(value);
   };
 
   return guard;

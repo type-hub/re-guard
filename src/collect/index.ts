@@ -1,16 +1,17 @@
+import { assertsBuilder } from "../assertsBuilder";
 import { createBrandedFunction } from "../createBrandedFunction";
 import { guardsBuilder } from "../guardsBuilder";
-import { CreateBrandedRegex, NamedRegexFactory } from "../types";
+import { CreateBrandedFunction, Input } from "../types";
 import { GetStringKeys, keys } from "../utils/keys";
 
 type MapRegexes<
-  T extends Record<string, NamedRegexFactory>,
+  T extends Record<string, Input>,
   _RxTypes extends Record<GetStringKeys<T>, any>
 > = {
-  [K in GetStringKeys<T>]: CreateBrandedRegex<K, _RxTypes[K]>;
+  [K in GetStringKeys<T>]: CreateBrandedFunction<K, _RxTypes[K]>;
 };
 
-export const collect = <RegLookup extends Record<string, NamedRegexFactory>>(
+export const collect = <RegLookup extends Record<string, Input>>(
   regLookup: RegLookup
 ) => ({
   brand: <RegTypes extends Record<keyof RegLookup, any>>() => {
@@ -25,7 +26,22 @@ export const collect = <RegLookup extends Record<string, NamedRegexFactory>>(
 
     return {
       build: () => {
-        return guardsBuilder(brandedFunctions);
+        const guards = guardsBuilder(brandedFunctions);
+        const asserts = assertsBuilder(brandedFunctions);
+
+        type Out = {
+          [K in keyof typeof guards]: {
+            guard: (typeof guards)[K];
+            asserts: (typeof asserts)[K];
+          };
+        };
+
+        const finalMap = keys(regLookup).reduce((acc, key) => {
+          acc[key]["guard"] = guards[key];
+          return acc;
+        }, {} as Out);
+
+        return finalMap;
       },
     };
   },

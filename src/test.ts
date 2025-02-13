@@ -1,9 +1,29 @@
+import { assertBuilder } from "./assertBuilder";
 import { collect } from "./collect";
+import { createBrandedFunction } from "./createBrandedFunction";
 import { regexes, RegexesTypes } from "./data";
 
-// TODO: blend(), use few regexs to build validators
-// TODO: support zod schemas, but isn't zod.brand already a type guard
+/*
 
+TODO:
+- blend(), use few regexs to build validators
+- create generator that will add assertions automatically
+- add try/catch at validation level to support wrong inputs
+- create two modes: typed in and untyped in checks
+- create tests for all inputs
+- create explanation for all type issues
+- create single entry func
+- create multi entry func
+
+
+DONE:
+- support arrays of regexes and funcs
+- support arrays of non bool funcs
+- support zod schemas, but isn't zod.brand already a type guard
+- open type for regexes
+- support zod brand output for type guards
+
+*/
 // TEST ----------------------------
 
 /*
@@ -29,17 +49,61 @@ if (importType.guard(v)) {
 
 
 */
+const testValue =
+  Math.random() > 0.5
+    ? "true"
+    : Math.random() > 0.5
+    ? 1
+    : Math.random() > 0.5
+    ? false
+    : "2";
 
-const validators = collect(regexes).brand<RegexesTypes>().build();
+const brf = createBrandedFunction<"super-type">()(/a/, "super-name");
+const asrt = assertBuilder(brf);
 
-const testValue = Math.random() > 0.5 ? "true" : "1";
+function assert(): (value: unknown) => asserts value is `${boolean}` {
+  return function assertIn(value: unknown): asserts value is `${boolean}` {
+    if (!value) {
+      throw new Error(`re-guard: assertion failed,`);
+    }
+  };
+}
 
-if (validators.regexA(testValue)) {
+const SuperTest = assert();
+// SuperTest(testValue)
+// MY_TEST(testValue);
+// testValue;
+// ^?
+
+// asrt(testValue);
+// testValue;
+// ^?
+
+const XXXX = collect(regexes).brand<RegexesTypes>().build();
+
+XXXX.regexA.guard("1");
+const { regexA, regexB, custom, zod } = collect(regexes)
+  .brand<RegexesTypes>()
+  .build();
+
+regexA.guard(testValue);
+
+if (regexA.guard(testValue)) {
   const z = testValue;
   //    ^?
 }
 
-if (validators.regexB(testValue)) {
+if (regexB.guard(testValue)) {
+  const z = testValue;
+  //    ^?
+}
+
+if (custom.guard(testValue)) {
+  const z = testValue;
+  //    ^?
+}
+
+if (zod.guard(testValue)) {
   const z = testValue;
   //    ^?
 }
