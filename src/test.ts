@@ -38,16 +38,6 @@ validator.importType
 - ?schema (org zod schema)
 - ...
 
-z.schema.brand<T>().safeParse -> pred
-z.schema.parse -> asert
-
-const { importType } = validators
-
-if (importType.guard(v)) {
-  v // narrowing
-}
-
-
 */
 const testValue =
   Math.random() > 0.5
@@ -61,30 +51,12 @@ const testValue =
 const brf = createBrandedFunction<"super-type">()(/a/, "super-name");
 const asrt = buildAssertion(brf);
 
-function assert(): (value: unknown) => asserts value is `${boolean}` {
-  return function assertIn(value: unknown): asserts value is `${boolean}` {
-    if (!value) {
-      throw new Error(`re-guard: assertion failed,`);
-    }
-  };
-}
-
-const SuperTest = assert();
-// SuperTest(testValue)
-// MY_TEST(testValue);
-// testValue;
-// ^?
-
-// asrt(testValue);
-// testValue;
-// ^?
-
 const { hashTag, mention, zod, zodBranded, custom } = collect(regexes)
   .setTypes<RegexesTypes>()
   .build();
 
 // const v = collect(regexes).setTypes<RegexesTypes>().build();
-// console.log(v);
+// const x =(hashTag.regex.test('a'), zod.regex.test('a'));
 
 if (hashTag.guard(testValue)) {
   console.log(testValue);
@@ -98,7 +70,15 @@ if (mention.guard(testValue)) {
 
 if (zod.guard(testValue)) {
   console.log(testValue);
-  //          ^?
+  //          ^?const SuperTest = assert();
+  // SuperTest(testValue)
+  // MY_TEST(testValue);
+  // testValue;
+  // ^?
+
+  // asrt(testValue);
+  // testValue;
+  // ^?
 }
 
 if (zodBranded.guard(testValue)) {
@@ -112,3 +92,9 @@ if (custom.guard(testValue)) {
   console.log(testValue);
   //          ^?
 }
+
+export const hashTagAssertion: typeof hashTag.assert = hashTag.assert;
+console.log(hashTag, testValue);
+hashTagAssertion(testValue);
+
+testValue;

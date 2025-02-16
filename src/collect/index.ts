@@ -2,6 +2,7 @@ import { buildAssertions } from "../buildAssertions";
 import { buildGuards } from "../buildGuards";
 import { createBrandedFunction } from "../createBrandedFunction";
 import { CreateBrandedFunction, Input } from "../types";
+import { isRegex } from "../utils";
 import { GetStringKeys, keys } from "../utils/keys";
 
 type MapRegexes<
@@ -10,6 +11,12 @@ type MapRegexes<
 > = {
   [Key in GetStringKeys<Lookup>]: CreateBrandedFunction<Key, Types[Key]>;
 };
+
+type ExcludeNonRegexes<
+  Obj extends Record<string, any>,
+  Key extends keyof Obj
+> = Obj[Key] extends RegExp ? Key : never;
+// type ExcludeNonRegexes<Obj extends Record<string, any>, Key extends keyof Obj> = Obj[Key] extends RegExp ? Pick<Obj, Key> : never
 
 export const collect = <Lookup extends Record<string, Input>>(
   lookup: Lookup
@@ -31,10 +38,24 @@ export const collect = <Lookup extends Record<string, Input>>(
         const guards = buildGuards(brandedFunctions);
         const asserts = buildAssertions(brandedFunctions);
 
+        type MaybeRegexesLookup = {
+          [K in keyof Lookup as ExcludeNonRegexes<Lookup, K>]: RegExp;
+          // [K in keyof Lookup as Lookup[K]]: RegExp;
+        };
+
+        type GetRegex<K extends keyof Lookup> = Lookup[K] extends RegExp
+          ? Lookup[K]
+          : never;
+
+        type MaybeRegex = "";
+
         type Out = {
           [K in keyof typeof guards]: {
             guard: (typeof guards)[K];
-            // asserts: (typeof asserts)[K];
+            assert: (typeof asserts)[K];
+
+            // regex: MaybeRegexesLookup[K]; //  GetRegex<K>//
+            // regex: ExcludeNonRegexes<Lookup, K>
           };
         };
 
@@ -44,6 +65,11 @@ export const collect = <Lookup extends Record<string, Input>>(
           }
 
           acc[key]["guard"] = guards[key];
+          acc[key]["assert"] = asserts[key];
+          if (isRegex(lookup[key])) {
+            // acc[key]["regex"] = lookup[key];
+          }
+
           return acc;
         }, {} as Out);
 
