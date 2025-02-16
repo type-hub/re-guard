@@ -15,7 +15,9 @@ export const collect = <Lookup extends Record<string, Input>>(
   lookup: Lookup
 ) => ({
   brand: <RegTypes extends Record<keyof Lookup, any>>() => {
-    const brandedFunctions = keys(lookup).reduce((acc, key) => {
+    const _keys = keys(lookup);
+
+    const brandedFunctions = _keys.reduce((acc, key) => {
       acc[key] = createBrandedFunction<RegTypes[typeof key]>()(
         lookup[key],
         key
@@ -32,11 +34,15 @@ export const collect = <Lookup extends Record<string, Input>>(
         type Out = {
           [K in keyof typeof guards]: {
             guard: (typeof guards)[K];
-            asserts: (typeof asserts)[K];
+            // asserts: (typeof asserts)[K];
           };
         };
 
-        const finalMap = keys(lookup).reduce((acc, key) => {
+        const finalMap = _keys.reduce((acc, key) => {
+          if (!(key in acc)) {
+            acc[key] = {} as Out[typeof key];
+          }
+
           acc[key]["guard"] = guards[key];
           return acc;
         }, {} as Out);

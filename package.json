@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
-    "patchAndRelease": "rm -rf ./dist && npm version patch && npm publish --access public"
+    "patchAndRelease": "rm -rf ./dist && npm run build && npm version patch && npm publish --access public"
   },
   "repository": {
     "type": "git",
