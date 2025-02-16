@@ -10,6 +10,7 @@
   "scripts": {
     "build": "tsc",
     "prepare": "npm run build",
+    "test": "tsx watch ./src/test.ts",
     "patchAndRelease": "rm -rf ./dist && npm run build && npm version patch && npm publish --access public"
   },
   "repository": {
@@ -31,6 +32,7 @@
   "homepage": "https://github.com/type-hub/re-guard#readme",
   "devDependencies": {
     "@types/node": "^22.13.1",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "zod": "^3.24.2"
   }

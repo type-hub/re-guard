@@ -79,12 +79,13 @@ const SuperTest = assert();
 // testValue;
 // ^?
 
-const XXXX = collect(regexes).brand<RegexesTypes>().build();
-
-XXXX.regexA.guard("1");
 const { regexA, regexB, custom, zod } = collect(regexes)
   .brand<RegexesTypes>()
   .build();
+
+const v = collect(regexes).brand<RegexesTypes>().build();
+
+console.log(v);
 
 if (regexA.guard(testValue)) {
   const z = testValue;

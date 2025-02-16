@@ -4,7 +4,8 @@ export type GetStringKeys<T extends Record<string, unknown>> = ExtractString<
 >;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function keys<T extends Record<string, any>>(o: T): GetStringKeys<T>[] {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  return Object.values(o);
+export function keys<Obj extends Record<string, any>>(
+  o: Obj
+): GetStringKeys<Obj>[] {
+  return Object.keys(o) as GetStringKeys<Obj>[];
 }
