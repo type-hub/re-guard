@@ -1,33 +1,33 @@
-import { assertsBuilder } from "../assertsBuilder";
+import { buildAssertions } from "../buildAssertions";
+import { buildGuards } from "../buildGuards";
 import { createBrandedFunction } from "../createBrandedFunction";
-import { guardsBuilder } from "../guardsBuilder";
 import { CreateBrandedFunction, Input } from "../types";
 import { GetStringKeys, keys } from "../utils/keys";
 
 type MapRegexes<
-  T extends Record<string, Input>,
-  _RxTypes extends Record<GetStringKeys<T>, any>
+  Lookup extends Record<string, Input>,
+  Types extends Record<GetStringKeys<Lookup>, any>
 > = {
-  [K in GetStringKeys<T>]: CreateBrandedFunction<K, _RxTypes[K]>;
+  [Key in GetStringKeys<Lookup>]: CreateBrandedFunction<Key, Types[Key]>;
 };
 
-export const collect = <RegLookup extends Record<string, Input>>(
-  regLookup: RegLookup
+export const collect = <Lookup extends Record<string, Input>>(
+  lookup: Lookup
 ) => ({
-  brand: <RegTypes extends Record<keyof RegLookup, any>>() => {
-    const brandedFunctions = keys(regLookup).reduce((acc, key) => {
+  brand: <RegTypes extends Record<keyof Lookup, any>>() => {
+    const brandedFunctions = keys(lookup).reduce((acc, key) => {
       acc[key] = createBrandedFunction<RegTypes[typeof key]>()(
-        regLookup[key],
+        lookup[key],
         key
       );
 
       return acc;
-    }, {} as MapRegexes<RegLookup, RegTypes>);
+    }, {} as MapRegexes<Lookup, RegTypes>);
 
     return {
       build: () => {
-        const guards = guardsBuilder(brandedFunctions);
-        const asserts = assertsBuilder(brandedFunctions);
+        const guards = buildGuards(brandedFunctions);
+        const asserts = buildAssertions(brandedFunctions);
 
         type Out = {
           [K in keyof typeof guards]: {
@@ -36,7 +36,7 @@ export const collect = <RegLookup extends Record<string, Input>>(
           };
         };
 
-        const finalMap = keys(regLookup).reduce((acc, key) => {
+        const finalMap = keys(lookup).reduce((acc, key) => {
           acc[key]["guard"] = guards[key];
           return acc;
         }, {} as Out);

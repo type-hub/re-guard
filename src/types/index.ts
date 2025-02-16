@@ -1,6 +1,5 @@
 import { ZodSchema } from "zod/lib/types";
 
-// TODO: switch string to any
 export type ValidationWrapper = (value: any) => any;
 export type SupportedInput = RegExp | ValidationWrapper | ZodSchema;
 export type Input = SupportedInput | SupportedInput[];

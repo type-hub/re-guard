@@ -1,4 +1,4 @@
-import { assertBuilder } from "./assertBuilder";
+import { buildAssertion } from "./buildAssertion";
 import { collect } from "./collect";
 import { createBrandedFunction } from "./createBrandedFunction";
 import { regexes, RegexesTypes } from "./data";
@@ -59,7 +59,7 @@ const testValue =
     : "2";
 
 const brf = createBrandedFunction<"super-type">()(/a/, "super-name");
-const asrt = assertBuilder(brf);
+const asrt = buildAssertion(brf);
 
 function assert(): (value: unknown) => asserts value is `${boolean}` {
   return function assertIn(value: unknown): asserts value is `${boolean}` {
@@ -85,8 +85,6 @@ XXXX.regexA.guard("1");
 const { regexA, regexB, custom, zod } = collect(regexes)
   .brand<RegexesTypes>()
   .build();
-
-regexA.guard(testValue);
 
 if (regexA.guard(testValue)) {
   const z = testValue;
