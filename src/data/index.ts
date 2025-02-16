@@ -9,7 +9,7 @@ export const regexes = {
   zod: z.boolean(),
   zodBranded: z.boolean().brand("zod"),
 
-  custom: (x: string) => (Math.random() > 0.5 ? true : false),
+  custom: (x: any) => (Math.random() > 0.5 ? true : false),
 } as const;
 
 export type RegexesTypes = {
@@ -19,5 +19,5 @@ export type RegexesTypes = {
   zod: z.infer<typeof regexes.zod>;
   zodBranded: z.infer<typeof regexes.zod>;
 
-  custom: `${string}`;
+  custom: `${boolean}`;
 };

@@ -46,6 +46,8 @@ const testValue =
     ? "#money"
     : Math.random() > 0.5
     ? true
+    : Math.random() > 0.5
+    ? "false"
     : "2";
 
 const brf = createBrandedFunction<"super-type">()(/a/, "super-name");
@@ -71,22 +73,12 @@ if (mention.guard(testValue)) {
 if (zod.guard(testValue)) {
   console.log(testValue);
   //          ^?const SuperTest = assert();
-  // SuperTest(testValue)
-  // MY_TEST(testValue);
-  // testValue;
-  // ^?
-
-  // asrt(testValue);
-  // testValue;
-  // ^?
 }
 
 if (zodBranded.guard(testValue)) {
   console.log(testValue);
   //          ^?
 }
-
-//
 
 if (custom.guard(testValue)) {
   console.log(testValue);
@@ -95,6 +87,6 @@ if (custom.guard(testValue)) {
 
 export const hashTagAssertion: typeof hashTag.assert = hashTag.assert;
 console.log(hashTag, testValue);
-hashTagAssertion(testValue);
+// hashTagAssertion(testValue);
 
 testValue;

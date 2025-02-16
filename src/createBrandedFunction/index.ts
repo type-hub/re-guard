@@ -16,7 +16,7 @@ function tryCatch(
   return result;
 }
 
-function safeValidate(input: SupportedInput, value: string): boolean {
+function safeValidate(input: SupportedInput, value: any): boolean {
   if (isRegex(input)) {
     // @ts-ignore
     return tryCatch((v: any) => input.test(v), value);
@@ -38,12 +38,12 @@ export const createBrandedFunction =
   ): CreateBrandedFunction<Name, Type> => {
     const brandedFunction = function () {
       if (Array.isArray(input)) {
-        return function multiValidation(value: string): boolean {
+        return function multiValidation(value: any): boolean {
           return input.every((i) => safeValidate(i, value));
         };
       }
 
-      return function singleValidation(value: string): boolean {
+      return function singleValidation(value: any): boolean {
         return safeValidate(input, value);
       };
     };

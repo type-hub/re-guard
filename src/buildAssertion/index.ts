@@ -7,7 +7,7 @@ export type BuildAssertion<BF extends BrandedFunction> = (
 export function buildAssertion<BF extends BrandedFunction>(
   bf: BF
 ): BuildAssertion<BF> {
-  function assert(value: string): asserts value is GetBrand<BF> {
+  function assert(value: any): asserts value is GetBrand<BF> {
     const validator = bf();
 
     if (!validator(value)) {
