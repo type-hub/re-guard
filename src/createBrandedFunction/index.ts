@@ -16,7 +16,7 @@ function tryCatch(
   return result;
 }
 
-function validate(input: SupportedInput, value: string): boolean {
+function safeValidate(input: SupportedInput, value: string): boolean {
   if (isRegex(input)) {
     // @ts-ignore
     return tryCatch((v: any) => input.test(v), value);
@@ -31,26 +31,26 @@ function validate(input: SupportedInput, value: string): boolean {
 }
 
 export const createBrandedFunction =
-  <Brand>() =>
+  <Type>() =>
   <Name extends string>(
     input: Input,
     name: Name
-  ): CreateBrandedFunction<Name, Brand> => {
-    const brandedRegex = function () {
+  ): CreateBrandedFunction<Name, Type> => {
+    const brandedFunction = function () {
       if (Array.isArray(input)) {
         return function multiValidation(value: string): boolean {
-          return input.every((i) => validate(i, value));
+          return input.every((i) => safeValidate(i, value));
         };
       }
 
       return function singleValidation(value: string): boolean {
-        return validate(input, value);
+        return safeValidate(input, value);
       };
     };
 
-    brandedRegex.name = name;
-    let brand: Brand | undefined;
-    brandedRegex.brand = brand;
+    brandedFunction.___name = name;
+    let brand: Type | undefined;
+    brandedFunction.___type = brand;
 
-    return brandedRegex;
+    return brandedFunction;
   };

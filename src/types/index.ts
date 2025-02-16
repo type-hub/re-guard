@@ -6,17 +6,17 @@ export type Input = SupportedInput | SupportedInput[];
 
 export type BrandedFunction = {
   (): ValidationWrapper;
-  name: string;
-  brand: any;
+  ___name: string;
+  ___type: any;
 };
 
 export type CreateBrandedFunction<Name extends string, Brand> = {
   (): ValidationWrapper;
-  name: Name;
-  brand: Brand | undefined;
+  ___name: Name;
+  ___type: Brand | undefined;
 };
 
-export type GetBrand<BRF extends BrandedFunction> = Exclude<
-  BRF["brand"],
+export type GetBrand<BF extends BrandedFunction> = Exclude<
+  BF["___type"],
   undefined
 >;

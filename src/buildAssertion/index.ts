@@ -11,7 +11,9 @@ export function buildAssertion<BF extends BrandedFunction>(
     const validator = bf();
 
     if (!validator(value)) {
-      throw new Error(`re-guard: assertion failed, ${bf.name}`);
+      throw new Error(
+        `re-guard: ${bf.___name} assertion failed with value: ${value}`
+      );
     }
   }
 
