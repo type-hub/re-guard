@@ -51,11 +51,11 @@ if (importType.guard(v)) {
 */
 const testValue =
   Math.random() > 0.5
-    ? "true"
+    ? "@john_doe"
     : Math.random() > 0.5
-    ? 1
+    ? "#money"
     : Math.random() > 0.5
-    ? false
+    ? true
     : "2";
 
 const brf = createBrandedFunction<"super-type">()(/a/, "super-name");
@@ -79,30 +79,36 @@ const SuperTest = assert();
 // testValue;
 // ^?
 
-const { regexA, regexB, custom, zod } = collect(regexes)
-  .brand<RegexesTypes>()
+const { hashTag, mention, zod, zodBranded, custom } = collect(regexes)
+  .setTypes<RegexesTypes>()
   .build();
 
-const v = collect(regexes).brand<RegexesTypes>().build();
+// const v = collect(regexes).setTypes<RegexesTypes>().build();
+// console.log(v);
 
-console.log(v);
-
-if (regexA.guard(testValue)) {
-  const z = testValue;
-  //    ^?
+if (hashTag.guard(testValue)) {
+  console.log(testValue);
+  //          ^?
 }
 
-if (regexB.guard(testValue)) {
-  const z = testValue;
-  //    ^?
-}
-
-if (custom.guard(testValue)) {
-  const z = testValue;
-  //    ^?
+if (mention.guard(testValue)) {
+  console.log(testValue);
+  //          ^?
 }
 
 if (zod.guard(testValue)) {
-  const z = testValue;
-  //    ^?
+  console.log(testValue);
+  //          ^?
+}
+
+if (zodBranded.guard(testValue)) {
+  console.log(testValue);
+  //          ^?
+}
+
+//
+
+if (custom.guard(testValue)) {
+  console.log(testValue);
+  //          ^?
 }

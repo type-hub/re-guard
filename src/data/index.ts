@@ -1,18 +1,23 @@
 import { z } from "zod";
 
-export const regexA = /^import type {[\s]*([\w]+[\s]*)} from .+$/;
-export const regexB = /^imp .+$/;
+export const hashTag = /^#\w+$/; // #money
+export const mention = /^@\w+$/; // @john_doe
 
 export const regexes = {
-  regexA,
-  regexB,
+  hashTag: hashTag,
+  mention: mention,
+  zod: z.boolean(),
+  zodBranded: z.boolean().brand("zod"),
+
   custom: (x: string) => (Math.random() > 0.5 ? true : false),
-  zod: z.boolean().brand("zod"),
 } as const;
 
 export type RegexesTypes = {
-  regexA: `${number}`;
-  regexB: `${boolean}`;
-  custom: `${string}`;
+  hashTag: `#${string}`;
+  mention: `@${string}`;
+  // TODO: use infer inside collect
   zod: z.infer<typeof regexes.zod>;
+  zodBranded: z.infer<typeof regexes.zod>;
+
+  custom: `${string}`;
 };

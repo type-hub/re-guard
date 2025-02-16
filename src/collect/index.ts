@@ -14,7 +14,7 @@ type MapRegexes<
 export const collect = <Lookup extends Record<string, Input>>(
   lookup: Lookup
 ) => ({
-  brand: <RegTypes extends Record<keyof Lookup, any>>() => {
+  setTypes: <RegTypes extends Record<keyof Lookup, any>>() => {
     const _keys = keys(lookup);
 
     const brandedFunctions = _keys.reduce((acc, key) => {
