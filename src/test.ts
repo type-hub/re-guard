@@ -1,7 +1,8 @@
-import { buildAssertion } from "./buildAssertion";
-import { collect } from "./collect";
-import { createBrandedFunction } from "./createBrandedFunction";
-import { regexes, RegexesTypes } from "./data";
+import { z } from "zod"
+import { collect } from "./collect"
+import { createBrandedFunction } from "./createBrandedFunction"
+import { regexes, RegexesTypes } from "./data"
+import { reGuard } from "./reGuard"
 
 /*
 
@@ -48,45 +49,59 @@ const testValue =
     ? true
     : Math.random() > 0.5
     ? "false"
-    : "2";
+    : "2"
 
-const brf = createBrandedFunction<"super-type">()(/a/, "super-name");
-const asrt = buildAssertion(brf);
+const brf = createBrandedFunction<"super-type">()(/a/, "super-name")
 
 const { hashTag, mention, zod, zodBranded, custom } = collect(regexes)
   .setTypes<RegexesTypes>()
-  .build();
+  .build()
+
+const rg = reGuard("nameX", /a/).type<RegExp>().build()
+//    ^?
+rg.regex
+
+const rgz = reGuard("nameX", z.string()).type<"nameX">().build()
+//    ^?
+rgz.schema
 
 // const v = collect(regexes).setTypes<RegexesTypes>().build();
 // const x =(hashTag.regex.test('a'), zod.regex.test('a'));
 
 if (hashTag.guard(testValue)) {
-  console.log(testValue);
+  console.log(testValue)
   //          ^?
 }
 
 if (mention.guard(testValue)) {
-  console.log(testValue);
+  console.log(testValue)
   //          ^?
 }
 
 if (zod.guard(testValue)) {
-  console.log(testValue);
-  //          ^?const SuperTest = assert();
+  console.log(testValue)
+  //          ^?
 }
 
 if (zodBranded.guard(testValue)) {
-  console.log(testValue);
+  console.log(testValue)
   //          ^?
 }
 
 if (custom.guard(testValue)) {
-  console.log(testValue);
+  console.log(testValue)
   //          ^?
 }
 
-export const hashTagAssertion: typeof hashTag.assert = hashTag.assert;
-console.log(hashTag, testValue);
-// hashTagAssertion(testValue);
+hashTag.assert()
 
-testValue;
+export const hashTagAssertion: typeof hashTag.assert = hashTag.assert
+console.log(hashTag, testValue)
+hashTagAssertion(testValue)
+
+testValue
+// ^?
+
+// hashTag.reGuard.ts
+export const { regex, guard, ...rest } = hashTag
+export const assert: typeof rest.assert = rest.assert

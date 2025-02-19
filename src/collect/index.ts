@@ -1,80 +1,32 @@
-import { buildAssertions } from "../buildAssertions";
-import { buildGuards } from "../buildGuards";
-import { createBrandedFunction } from "../createBrandedFunction";
-import { CreateBrandedFunction, Input } from "../types";
-import { isRegex } from "../utils";
-import { GetStringKeys, keys } from "../utils/keys";
+import { CreateReGuard, reGuard } from "../reGuard"
+import { SupportedInput } from "../types"
+import { GetStringKeys, keys } from "../utils/keys"
 
-type MapRegexes<
-  Lookup extends Record<string, Input>,
+type MapInput<
+  Lookup extends Record<string, SupportedInput>,
   Types extends Record<GetStringKeys<Lookup>, any>
 > = {
-  [Key in GetStringKeys<Lookup>]: CreateBrandedFunction<Key, Types[Key]>;
-};
+  [Key in GetStringKeys<Lookup>]: CreateReGuard<Key, Lookup[Key], Types[Key]>
+}
 
-type ExcludeNonRegexes<
-  Obj extends Record<string, any>,
-  Key extends keyof Obj
-> = Obj[Key] extends RegExp ? Key : never;
-// type ExcludeNonRegexes<Obj extends Record<string, any>, Key extends keyof Obj> = Obj[Key] extends RegExp ? Pick<Obj, Key> : never
-
-export const collect = <Lookup extends Record<string, Input>>(
+export const collect = <Lookup extends Record<string, SupportedInput>>(
   lookup: Lookup
 ) => ({
   setTypes: <RegTypes extends Record<keyof Lookup, any>>() => {
-    const _keys = keys(lookup);
-
-    const brandedFunctions = _keys.reduce((acc, key) => {
-      acc[key] = createBrandedFunction<RegTypes[typeof key]>()(
-        lookup[key],
-        key
-      );
-
-      return acc;
-    }, {} as MapRegexes<Lookup, RegTypes>);
-
     return {
-      build: () => {
-        const guards = buildGuards(brandedFunctions);
-        const asserts = buildAssertions(brandedFunctions);
+      build: (): MapInput<Lookup, RegTypes> => {
+        const _keys = keys(lookup)
 
-        type MaybeRegexesLookup = {
-          [K in keyof Lookup as ExcludeNonRegexes<Lookup, K>]: RegExp;
-          // [K in keyof Lookup as Lookup[K]]: RegExp;
-        };
+        const brandedFunctions = _keys.reduce((acc, key) => {
+          acc[key] = reGuard(key, lookup[key])
+            .type<RegTypes[typeof key]>()
+            .build()
 
-        type GetRegex<K extends keyof Lookup> = Lookup[K] extends RegExp
-          ? Lookup[K]
-          : never;
+          return acc
+        }, {} as MapInput<Lookup, RegTypes>)
 
-        type MaybeRegex = "";
-
-        type Out = {
-          [K in keyof typeof guards]: {
-            guard: (typeof guards)[K];
-            assert: (typeof asserts)[K];
-
-            // regex: MaybeRegexesLookup[K]; //  GetRegex<K>//
-            // regex: ExcludeNonRegexes<Lookup, K>
-          };
-        };
-
-        const finalMap = _keys.reduce((acc, key) => {
-          if (!(key in acc)) {
-            acc[key] = {} as Out[typeof key];
-          }
-
-          acc[key]["guard"] = guards[key];
-          acc[key]["assert"] = asserts[key];
-          if (isRegex(lookup[key])) {
-            // acc[key]["regex"] = lookup[key];
-          }
-
-          return acc;
-        }, {} as Out);
-
-        return finalMap;
+        return brandedFunctions
       },
-    };
+    }
   },
-});
+})
