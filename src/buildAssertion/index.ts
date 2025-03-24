@@ -1,21 +1,19 @@
-import { BrandedFunction, GetBrand } from "../types";
+import { SupportedInput } from "../types"
+import { validationWrapper } from "../utils/validationWrapper"
 
-export type BuildAssertion<BF extends BrandedFunction> = (
-  value: any
-) => asserts value is GetBrand<BF>;
+export type BuildAssertion<Type> = (value: any) => asserts value is Type
 
-export function buildAssertion<BF extends BrandedFunction>(
-  bf: BF
-): BuildAssertion<BF> {
-  function assert(value: any): asserts value is GetBrand<BF> {
-    const validator = bf();
+export function buildAssertion<Type, Input extends SupportedInput>(
+  input: Input,
+  key: string
+): BuildAssertion<Type> {
+  function assert(value: any): asserts value is Type {
+    const validator = validationWrapper(input)
 
     if (!validator(value)) {
-      throw new Error(
-        `re-guard: ${bf.___name} assertion failed with value: ${value}`
-      );
+      throw new Error(`re-guard: ${key} assertion failed with value: ${value}`)
     }
   }
 
-  return assert;
+  return assert
 }

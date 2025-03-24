@@ -1,31 +1,74 @@
-import { CreateReGuard, reGuard } from "../reGuard"
+import { BuildAssertion, buildAssertion } from "../buildAssertion"
+import { BuildGuard, buildGuard } from "../buildGuard"
 import { SupportedInput } from "../types"
-import { GetStringKeys, keys } from "../utils/keys"
+import {
+  getStringKeys,
+  ResolveInputName,
+  resolveInputName,
+  ResolveInputToType,
+} from "../utils"
 
-type MapInput<
+type CreateGuards<
   Lookup extends Record<string, SupportedInput>,
-  Types extends Record<GetStringKeys<Lookup>, any>
+  Types extends Record<keyof Lookup, any>
 > = {
-  [Key in GetStringKeys<Lookup>]: CreateReGuard<Key, Lookup[Key], Types[Key]>
+  [K in keyof Lookup & string as `${K}Guard`]: BuildGuard<Types[K]>
+}
+
+type CreateAssertions<
+  Lookup extends Record<string, SupportedInput>,
+  Types extends Record<keyof Lookup, any>
+> = {
+  [K in keyof Lookup & string as `${K}Assert`]: BuildAssertion<Types[K]>
+}
+
+export type CreateInputs<Lookup extends Record<string, SupportedInput>> = {
+  [K in keyof Lookup & string as ResolveInputName<
+    K,
+    Lookup[K]
+  >]: ResolveInputToType<Lookup[K]>
 }
 
 export const collect = <Lookup extends Record<string, SupportedInput>>(
   lookup: Lookup
 ) => ({
-  setTypes: <RegTypes extends Record<keyof Lookup, any>>() => {
+  // TODO: infer zod types from lookup, zod keys should be optional
+  setTypes: <Types extends Record<keyof Lookup, any>>() => {
     return {
-      build: (): MapInput<Lookup, RegTypes> => {
-        const _keys = keys(lookup)
+      build: () => {
+        const _keys = getStringKeys(lookup)
 
-        const brandedFunctions = _keys.reduce((acc, key) => {
-          acc[key] = reGuard(key, lookup[key])
-            .type<RegTypes[typeof key]>()
-            .build()
+        const collection = _keys.reduce(
+          (acc, key) => {
+            const guardKey: `${typeof key}Guard` = `${key}Guard`
+            const assertKey: `${typeof key}Assert` = `${key}Assert`
+            const inputKey = resolveInputName(key, lookup[key])
 
-          return acc
-        }, {} as MapInput<Lookup, RegTypes>)
+            acc["guards"][guardKey] = buildGuard<
+              Types[typeof key],
+              (typeof lookup)[typeof key]
+            >(lookup[key]) as any
 
-        return brandedFunctions
+            acc["asserts"][assertKey] = buildAssertion<
+              Types[typeof key],
+              (typeof lookup)[typeof key]
+            >(lookup[key], key) as any
+
+            acc["inputs"][inputKey] = buildAssertion<
+              Types[typeof key],
+              (typeof lookup)[typeof key]
+            >(lookup[key], key) as any
+
+            return acc
+          },
+          {
+            guards: {} as CreateGuards<Lookup, Types>,
+            asserts: {} as CreateAssertions<Lookup, Types>,
+            inputs: {} as CreateInputs<Lookup>,
+          }
+        )
+
+        return collection
       },
     }
   },
