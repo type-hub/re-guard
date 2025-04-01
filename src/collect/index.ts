@@ -1,74 +1,125 @@
+import { ZodSchema } from "zod/lib/types"
 import { BuildAssertion, buildAssertion } from "../buildAssertion"
 import { BuildGuard, buildGuard } from "../buildGuard"
-import { SupportedInput } from "../types"
 import {
-  getStringKeys,
-  ResolveInputName,
-  resolveInputName,
-  ResolveInputToType,
-} from "../utils"
+  GetKeysWithDifferentType,
+  InferZodLookup,
+  PickBy,
+  RenameKeys,
+  SafeGet,
+  SupportedInput,
+  ValueOf,
+} from "../types"
+import { getStringKeys, ResolveInputName, resolveInputName } from "../utils"
 
 type CreateGuards<
   Lookup extends Record<string, SupportedInput>,
   Types extends Record<keyof Lookup, any>
+  // Types extends Record<any, any>
 > = {
-  [K in keyof Lookup & string as `${K}Guard`]: BuildGuard<Types[K]>
+  [K in keyof Lookup]: BuildGuard<Types[K]>
 }
 
 type CreateAssertions<
   Lookup extends Record<string, SupportedInput>,
   Types extends Record<keyof Lookup, any>
 > = {
-  [K in keyof Lookup & string as `${K}Assert`]: BuildAssertion<Types[K]>
+  [K in keyof Lookup]: BuildAssertion<Types[K & string]>
 }
 
-export type CreateInputs<Lookup extends Record<string, SupportedInput>> = {
-  [K in keyof Lookup & string as ResolveInputName<
-    K,
-    Lookup[K]
-  >]: ResolveInputToType<Lookup[K]>
+//
+
+function _remapKeys<T extends Record<string, any>, Suffix extends string>(
+  obj: T,
+  suffix: Suffix
+): RenameKeys<T, Suffix> {
+  return Object.keys(obj).reduce((acc, key) => {
+    const newKey = `${key}${suffix}` as keyof RenameKeys<T, Suffix>
+    acc[newKey] = obj[key]
+    return acc
+  }, {} as RenameKeys<T, Suffix>)
 }
 
-export const collect = <Lookup extends Record<string, SupportedInput>>(
-  lookup: Lookup
+//
+
+type RenameInputKeys<T extends Record<string, SupportedInput>> = {
+  [K in keyof T as `${ResolveInputName<K & string, T[K]>}`]: T[K]
+}
+
+function _remapInputKeys<T extends Record<string, SupportedInput>>(
+  obj: T
+): RenameInputKeys<T> {
+  return (Object.keys(obj) as (keyof T & string)[]).reduce((acc, key) => {
+    const newKey = resolveInputName(key, obj[key]) as keyof RenameInputKeys<T>
+    acc[newKey] = obj[key] as unknown as RenameInputKeys<T>[typeof newKey]
+
+    return acc
+  }, {} as RenameInputKeys<T>)
+}
+
+export const collect = <InputLookup extends Record<string, SupportedInput>>(
+  inputLookup: InputLookup
 ) => ({
-  // TODO: infer zod types from lookup, zod keys should be optional
-  setTypes: <Types extends Record<keyof Lookup, any>>() => {
+  setTypes: <
+    TypeLookupWithoutZod extends Record<
+      GetKeysWithDifferentType<
+        InputLookup,
+        Extract<ValueOf<InputLookup>, ZodSchema>
+      >,
+      any
+    >
+  >() => {
     return {
       build: () => {
-        const _keys = getStringKeys(lookup)
+        type ZodLookup = PickBy<
+          InputLookup,
+          Extract<ValueOf<InputLookup>, ZodSchema>
+        >
 
-        const collection = _keys.reduce(
+        type InferredZodLookup = InferZodLookup<ZodLookup>
+
+        type AllTypes = TypeLookupWithoutZod & InferredZodLookup
+
+        type SafeTypes = {
+          [K in keyof InputLookup]: K extends keyof AllTypes
+            ? AllTypes[K]
+            : never
+        }
+
+        // ------------------------------------------------------------
+
+        const _keys = getStringKeys(inputLookup)
+
+        const { guards, asserts, inputs } = _keys.reduce(
           (acc, key) => {
-            const guardKey: `${typeof key}Guard` = `${key}Guard`
-            const assertKey: `${typeof key}Assert` = `${key}Assert`
-            const inputKey = resolveInputName(key, lookup[key])
+            type AssignedValue = SafeGet<AllTypes, typeof key>
 
-            acc["guards"][guardKey] = buildGuard<
-              Types[typeof key],
-              (typeof lookup)[typeof key]
-            >(lookup[key]) as any
+            acc["guards"][key] = buildGuard<
+              AssignedValue,
+              (typeof inputLookup)[typeof key]
+            >(inputLookup[key])
 
-            acc["asserts"][assertKey] = buildAssertion<
-              Types[typeof key],
-              (typeof lookup)[typeof key]
-            >(lookup[key], key) as any
+            acc["asserts"][key] = buildAssertion<
+              AssignedValue,
+              (typeof inputLookup)[typeof key]
+            >(inputLookup[key], key)
 
-            acc["inputs"][inputKey] = buildAssertion<
-              Types[typeof key],
-              (typeof lookup)[typeof key]
-            >(lookup[key], key) as any
+            acc["inputs"][key] = inputLookup[key]
 
             return acc
           },
           {
-            guards: {} as CreateGuards<Lookup, Types>,
-            asserts: {} as CreateAssertions<Lookup, Types>,
-            inputs: {} as CreateInputs<Lookup>,
+            guards: {} as CreateGuards<InputLookup, SafeTypes>,
+            asserts: {} as CreateAssertions<InputLookup, SafeTypes>,
+            inputs: {} as InputLookup,
           }
         )
 
-        return collection
+        return {
+          guards: _remapKeys(guards, "Guard"),
+          asserts: _remapKeys(asserts, "Assert"),
+          inputs: _remapInputKeys(inputs),
+        }
       },
     }
   },
