@@ -1,4 +1,4 @@
-import { collect } from "./collect"
+import { collect } from "../dist"
 import { inputFuncs, inputTypes } from "./data"
 
 const maybeTrue = Math.random() > 0.5
@@ -48,26 +48,26 @@ if (maybeTrue) {
 // === GUARDS ===
 
 if (guards.hashTagGuard(randomValue)) {
-  console.log(randomValue)
-  //          ^?
+  randomValue
+  // ^?
 }
 
 if (guards.mentionGuard(randomValue)) {
-  console.log(randomValue)
-  //          ^?
+  randomValue
+  // ^?
 }
 
 if (guards.mentionGuard(randomValue)) {
-  console.log(randomValue)
-  //          ^?
+  randomValue
+  // ^?
 }
 
 if (guards.zodBrandedGuard(randomValue)) {
-  console.log(randomValue)
-  //          ^?
+  randomValue
+  // ^?
 }
 
 if (guards.customGuard(randomValue)) {
-  console.log(randomValue)
-  //          ^?
+  randomValue
+  // ^?
 }
