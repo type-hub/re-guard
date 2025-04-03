@@ -3,8 +3,6 @@ export type GetStringKeys<T extends Record<string, unknown>> = ExtractString<
   keyof T
 >
 
-export function getStringKeys<Obj extends Record<string, any>>(
+export const getStrKeys = <Obj extends Record<string, any>>(
   o: Obj
-): GetStringKeys<Obj>[] {
-  return Object.keys(o) as GetStringKeys<Obj>[]
-}
+): GetStringKeys<Obj>[] => Object.keys(o) as GetStringKeys<Obj>[]

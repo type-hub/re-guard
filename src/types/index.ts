@@ -1,7 +1,6 @@
-import { ZodSchema } from "zod/lib/types"
+import { ZodSchema } from "zod"
 
 export * from "./algo"
 
 type UnaryFunc = (value: any) => any
-export type SupportedInput = RegExp | UnaryFunc | ZodSchema
-export type Input = SupportedInput | SupportedInput[]
+export type Input = RegExp | UnaryFunc | ZodSchema

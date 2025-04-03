@@ -1,5 +1,5 @@
-import { ZodSchema } from "zod/lib/types"
-import { SupportedInput } from "."
+import type { ZodSchema } from "zod"
+import { Input } from "."
 
 export type ValueOf<T extends Record<string, any>> = T[keyof T]
 
@@ -78,14 +78,14 @@ export type GetKeysWithDifferentType<
 // ------------------------------------------------------------
 
 export type OmitBy<
-  Lookup extends Record<string, SupportedInput>,
+  Lookup extends Record<string, Input>,
   RejectType extends ValueOf<Lookup>
 > = {
   [K in GetKeysWithDifferentType<Lookup, RejectType>]: Lookup[K]
 }
 
 export type PickBy<
-  Lookup extends Record<string, SupportedInput>,
+  Lookup extends Record<string, Input>,
   AcceptedType extends ValueOf<Lookup>
 > = {
   [K in GetKeysWithType<

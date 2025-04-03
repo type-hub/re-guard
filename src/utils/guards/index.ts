@@ -1,14 +1,10 @@
-import { ZodSchema } from "zod/lib/types"
+import type { ZodSchema } from "zod"
 
-export function isRegex(value: unknown): value is RegExp {
-  return value instanceof RegExp
-}
+export const isRegex = (value: unknown): value is RegExp =>
+  value instanceof RegExp
 
-export function isZodSchema(value: unknown): value is ZodSchema {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "safeParse" in value &&
-    "parse" in value
-  )
-}
+export const isZodSchema = (value: unknown): value is ZodSchema =>
+  typeof value === "object" &&
+  value !== null &&
+  "safeParse" in value &&
+  "parse" in value

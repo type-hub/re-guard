@@ -1,19 +1,12 @@
-import { SupportedInput } from "../types"
-import { validationWrapper } from "../utils/validationWrapper"
+import { Input } from "../types"
+import { safeValidate } from "../utils/validationWrapper"
 
-export type BuildAssertion<Type> = (value: any) => asserts value is Type
+export type MakeAssertion<Type> = (value: any) => asserts value is Type
 
-export function buildAssertion<Type, Input extends SupportedInput>(
-  input: Input,
-  key: string
-): BuildAssertion<Type> {
-  function assert(value: any): asserts value is Type {
-    const validator = validationWrapper(input)
-
-    if (!validator(value)) {
-      throw new Error(`re-guard: ${key} assertion failed with value: ${value}`)
+export const makeAssertion =
+  <I extends Input, Type>(input: I, key: string): MakeAssertion<Type> =>
+  (value: any): asserts value is Type => {
+    if (!safeValidate(input, value)) {
+      throw new Error(`re-guard: ${key} assertion failed: ${value}`)
     }
   }
-
-  return assert
-}

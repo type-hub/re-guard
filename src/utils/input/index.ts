@@ -1,36 +1,29 @@
-import { ZodSchema } from "zod/lib/types"
+import { ZodSchema } from "zod"
 import { isRegex, isZodSchema } from ".."
-import { SupportedInput } from "../../types"
+import { Input } from "../../types"
 
 export type ResolveInputName<
   Name extends string,
-  Input extends SupportedInput
-> = Input extends RegExp
+  I extends Input
+> = I extends RegExp
   ? `${Name}Regex`
-  : Input extends ZodSchema
+  : I extends ZodSchema
   ? `${Name}Schema`
   : `${Name}Function`
 
-export const resolveInputName = <
-  Name extends string,
-  Input extends SupportedInput
->(
+export const resolveInputName = <Name extends string, I extends Input>(
   name: Name,
-  input: Input
-): ResolveInputName<Name, Input> => {
-  if (isRegex(input)) {
-    return `${name}Regex` as ResolveInputName<Name, Input>
-  } else if (isZodSchema(input)) {
-    return `${name}Schema` as ResolveInputName<Name, Input>
-  } else {
-    return `${name}Function` as ResolveInputName<Name, Input>
-  }
-}
+  input: I
+): ResolveInputName<Name, I> =>
+  isRegex(input)
+    ? (`${name}Regex` as ResolveInputName<Name, I>)
+    : isZodSchema(input)
+    ? (`${name}Schema` as ResolveInputName<Name, I>)
+    : (`${name}Function` as ResolveInputName<Name, I>)
 
-export type ResolveInputToType<Input extends SupportedInput> =
-  Input extends RegExp
-    ? //
-      Input
-    : Input extends ZodSchema
-    ? Input
-    : Input
+export type ResolveInputToType<I extends Input> = I extends RegExp
+  ? //
+    I
+  : I extends ZodSchema
+  ? I
+  : I

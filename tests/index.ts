@@ -1,4 +1,4 @@
-import { collect } from "../dist"
+import { collect } from "../dist/index"
 import { inputFuncs, inputTypes } from "./data"
 
 const maybeTrue = Math.random() > 0.5
@@ -14,11 +14,12 @@ const randomValue =
     ? "false"
     : "2"
 
+// } = collect(inputFuncs).setTypes<inputTypes>().build()
 const {
   asserts: a, // computed assertions
   guards, // computed guards
   inputs, // original input functions
-} = collect(inputFuncs).setTypes<inputTypes>().build()
+} = collect<typeof inputFuncs, inputTypes>(inputFuncs)
 
 // INFO: it must be like that due to TS limitations
 export const hashTagAssertion: typeof a.hashTagAssert = a.hashTagAssert
