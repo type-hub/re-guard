@@ -1,6 +1,6 @@
 {
   "name": "@type-hub/re-guard",
-  "version": "1.0.9-alpha.2",
+  "version": "1.0.9-alpha.3",
   "description": "Type-safe regex suite: build predicates, guards, and assertions from a single regex func",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
