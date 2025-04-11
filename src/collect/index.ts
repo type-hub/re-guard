@@ -10,7 +10,13 @@ import type {
   SafeGet,
   ValueOf,
 } from "../types"
-import { getStrKeys, ResolveInputName, resolveInputName } from "../utils"
+import {
+  fromPairs,
+  getKeys,
+  ResolveInputName,
+  resolveInputName,
+  toPairs,
+} from "../utils"
 
 type CreateGuards<
   Lookup extends Record<string, Input>,
@@ -28,15 +34,13 @@ type CreateAssertions<
 
 //
 
-const remapKeys = <T extends Record<string, any>, Suffix extends string>(
-  obj: T,
+const remapKeys = <Obj extends Record<string, any>, Suffix extends string>(
+  obj: Obj,
   suffix: Suffix
-): RenameKeys<T, Suffix> =>
-  Object.keys(obj).reduce((acc, key) => {
-    const newKey = `${key}${suffix}` as keyof RenameKeys<T, Suffix>
-    acc[newKey] = obj[key]
-    return acc
-  }, {} as RenameKeys<T, Suffix>)
+) =>
+  fromPairs(
+    toPairs(obj).map(([key, value]) => [`${key}${suffix}`, value])
+  ) as RenameKeys<Obj, Suffix>
 
 //
 
@@ -44,16 +48,10 @@ type RenameInputKeys<T extends Record<string, Input>> = {
   [K in keyof T as `${ResolveInputName<K & string, T[K]>}`]: T[K]
 }
 
-const remapInputKeys = <T extends Record<string, Input>>(
-  obj: T
-): RenameInputKeys<T> =>
-  getStrKeys(obj).reduce((acc, key) => {
-    const newKey = resolveInputName(key, obj[key]) as keyof RenameInputKeys<T>
-
-    acc[newKey] = obj[key] as unknown as RenameInputKeys<T>[typeof newKey]
-
-    return acc
-  }, {} as RenameInputKeys<T>)
+const remapInputKeys = <T extends Record<string, Input>>(obj: T) =>
+  fromPairs(
+    toPairs(obj).map(([key, value]) => [resolveInputName(key, value), value])
+  ) as unknown as RenameInputKeys<T>
 
 export const collect = <
   InputLookup extends Record<string, Input>,
@@ -75,7 +73,7 @@ export const collect = <
     [K in keyof InputLookup]: K extends keyof AllTypes ? AllTypes[K] : never
   }
 
-  const { guards, asserts, inputs } = getStrKeys(inputLookup).reduce(
+  const { guards, asserts, inputs } = getKeys(inputLookup).reduce(
     (acc, key) => {
       type AssignedValue = SafeGet<AllTypes, typeof key>
 

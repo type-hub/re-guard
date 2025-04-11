@@ -1,7 +1,7 @@
 import { Input } from "../../types"
 import { isRegex, isZodSchema } from "../guards"
 
-export const safeValidate = (input: Input, value: any): boolean => {
+export const safeValidate = <Type>(input: Input, value: any): value is Type => {
   let validator: (value: any) => boolean
 
   if (isRegex(input)) {
